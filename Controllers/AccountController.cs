@@ -75,5 +75,58 @@ namespace VaccinationCenter.Controllers
         }
 
         public IActionResult AccessDenied() => View();
+        // Route spéciale pour Postman
+        [HttpPost("/api/login")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> ApiLogin([FromBody] LoginApiModel model)
+        {
+            var compte = await _compteService.AuthenticateAsync(model.Login, model.Password);
+            if (compte == null)
+                return Unauthorized(new { message = "Login ou mot de passe incorrect" });
+
+            var claims = new List<Claim>
+    {
+        new(ClaimTypes.Name, compte.Login),
+        new(ClaimTypes.Role, compte.Role.ToString()),
+        new("CompteId", compte.Id.ToString())
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity));
+
+            return Ok(new
+            {
+                message = "Connexion réussie",
+                login = compte.Login,
+                role = compte.Role.ToString()
+            });
+        }
+
+        [HttpPost("/api/register")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> ApiRegister([FromBody] LoginApiModel model)
+        {
+            if (await _compteService.LoginExistsAsync(model.Login))
+                return BadRequest(new { message = "Login déjà utilisé" });
+
+            await _compteService.RegisterAsync(model.Login, model.Password);
+            return Ok(new { message = "Compte créé avec succès" });
+        }
+
+        [HttpGet("/api/logout")]
+        public async Task<IActionResult> ApiLogout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return Ok(new { message = "Déconnecté" });
+        }
+        public class LoginApiModel
+        {
+            public string Login { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
     }
+
+
 }
