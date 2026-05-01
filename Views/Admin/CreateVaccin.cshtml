@@ -1,0 +1,67 @@
+@model VaccinationCenter.Models.Vaccin
+@{
+    ViewData["Title"] = Model.VaccinId == 0 ? "Ajouter un vaccin" : "Modifier le vaccin";
+    ViewData["Active"] = "Vaccins";
+    var action = Model.VaccinId == 0 ? "CreateVaccin" : "EditVaccin";
+    var centres = ViewBag.Centres as IEnumerable<VaccinationCenter.Models.CentreVaccination> ?? new List<VaccinationCenter.Models.CentreVaccination>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-vial me-2"></i>@ViewData["Title"]</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="@action" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="VaccinId" type="hidden" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="TypeVaccin" class="form-label fw-semibold">Type de vaccin</label>
+                            <select asp-for="TypeVaccin" class="form-select"
+                                    asp-items="Html.GetEnumSelectList<VaccinationCenter.Models.TypeVaccin>()">
+                                <option value="">-- Choisir --</option>
+                            </select>
+                            <span asp-validation-for="TypeVaccin" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Fournisseur" class="form-label fw-semibold">Fournisseur</label>
+                            <input asp-for="Fournisseur" class="form-control" />
+                            <span asp-validation-for="Fournisseur" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Quantite" class="form-label fw-semibold">Quantité</label>
+                            <input asp-for="Quantite" type="number" class="form-control" min="0" />
+                            <span asp-validation-for="Quantite" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DateValidite" class="form-label fw-semibold">Date de validité</label>
+                            <input asp-for="DateValidite" type="date" class="form-control" />
+                            <span asp-validation-for="DateValidite" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="CentreVaccinationId" class="form-label fw-semibold">Centre de vaccination</label>
+                            <select asp-for="CentreVaccinationId" class="form-select">
+                                <option value="">-- Choisir un centre --</option>
+                                @foreach (var c in centres)
+                                {
+                                    <option value="@c.CentreVaccinationId">@c.ResponsableCentre (Capacité: @c.Capacite)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CentreVaccinationId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Enregistrer
+                        </button>
+                        <a href="/Admin/Vaccins" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

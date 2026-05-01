@@ -1,0 +1,47 @@
+@model VaccinationCenter.Models.CentreVaccination
+@{
+    ViewData["Title"] = Model.CentreVaccinationId == 0 ? "Ajouter un centre" : "Modifier le centre";
+    ViewData["Active"] = "Centres";
+    var action = Model.CentreVaccinationId == 0 ? "CreateCentre" : "EditCentre";
+}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h6 class="mb-0"><i class="fas fa-hospital me-2"></i>@ViewData["Title"]</h6>
+      </div>
+      <div class="card-body">
+        <form asp-action="@action" method="post">
+          @Html.AntiForgeryToken()
+          <input asp-for="CentreVaccinationId" type="hidden" />
+          <div class="row g-3">
+            <div class="col-12">
+              <label asp-for="ResponsableCentre" class="form-label fw-semibold">Responsable</label>
+              <input asp-for="ResponsableCentre" class="form-control" />
+              <span asp-validation-for="ResponsableCentre" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Capacite" class="form-label fw-semibold">Capacité</label>
+              <input asp-for="Capacite" type="number" class="form-control" />
+              <span asp-validation-for="Capacite" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="NbChaises" class="form-label fw-semibold">Nb. chaises</label>
+              <input asp-for="NbChaises" type="number" class="form-control" />
+              <span asp-validation-for="NbChaises" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+              <label asp-for="NumTelephone" class="form-label fw-semibold">Téléphone</label>
+              <input asp-for="NumTelephone" type="number" class="form-control" />
+              <span asp-validation-for="NumTelephone" class="text-danger small"></span>
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Enregistrer</button>
+            <a href="/Admin/Centres" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

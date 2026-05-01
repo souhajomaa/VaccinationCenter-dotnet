@@ -1,0 +1,51 @@
+@model IEnumerable<VaccinationCenter.Models.Citoyen>
+@{
+    ViewData["Title"] = "Gestion des citoyens";
+    ViewData["Active"] = "Citoyens";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="fas fa-users me-2 text-success"></i>Citoyens</h5>
+    <a href="/Admin/CreateCitoyen" class="btn btn-success btn-sm">
+        <i class="fas fa-plus me-1"></i>Ajouter un citoyen
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>CIN</th><th>Nom Prénom</th><th>Âge</th><th>Téléphone</th><th>N° EVAX</th><th>Ville</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td><code>@c.CIN</code></td>
+                        <td><strong>@c.Nom</strong> @c.Prenom</td>
+                        <td>@c.Age ans</td>
+                        <td>@c.Telephone</td>
+                        <td>@c.NumeroEvax</td>
+                        <td>@(c.Addresse?.Ville ?? "-")</td>
+                        <td>
+                            <a href="/Admin/EditCitoyen/@c.CiToyenId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="/Admin/DeleteCitoyen" class="d-inline"
+                                  onsubmit="return confirm('Supprimer ce citoyen ?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@c.CiToyenId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-users fa-3x mb-3 opacity-25"></i>
+                <p>Aucun citoyen enregistré</p>
+            </div>
+        }
+    </div>
+</div>

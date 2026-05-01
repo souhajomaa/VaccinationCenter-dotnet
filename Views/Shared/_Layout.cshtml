@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - VaccinCenter</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --danger: #dc3545;
+            --sidebar-bg: #1a1f2e;
+            --sidebar-text: #a9b4c8;
+            --sidebar-active: #0d6efd;
+        }
+        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        .sidebar {
+            width: 260px; min-height: 100vh; background: var(--sidebar-bg);
+            position: fixed; left: 0; top: 0; z-index: 100;
+            padding: 0; box-shadow: 4px 0 15px rgba(0,0,0,.3);
+        }
+        .sidebar-brand {
+            padding: 1.5rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,.08);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar-brand .logo { width: 40px; height: 40px; background: var(--primary);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-brand span { color: #fff; font-size: 1.1rem; font-weight: 700; }
+        .sidebar-brand small { color: var(--sidebar-text); font-size: .72rem; display: block; }
+        .sidebar-nav { padding: 1rem 0; }
+        .nav-section { color: #5a6a84; font-size: .7rem; text-transform: uppercase;
+            letter-spacing: 1.2px; padding: .5rem 1.4rem .3rem; }
+        .sidebar a {
+            display: flex; align-items: center; gap: 10px; padding: .65rem 1.4rem;
+            color: var(--sidebar-text); text-decoration: none; font-size: .88rem;
+            border-radius: 0; transition: all .2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: rgba(13,110,253,.15); color: #fff;
+            border-left: 3px solid var(--sidebar-active);
+        }
+        .sidebar a i { width: 18px; text-align: center; }
+        .main-content { margin-left: 260px; min-height: 100vh; }
+        .top-nav {
+            background: #fff; padding: .8rem 1.5rem; border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 99; box-shadow: 0 1px 6px rgba(0,0,0,.06);
+        }
+        .top-nav .breadcrumb { margin: 0; font-size: .85rem; }
+        .page-content { padding: 1.8rem; }
+        .card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+        .card-header { border-radius: 14px 14px 0 0 !important; border-bottom: none; padding: 1rem 1.3rem; }
+        .btn { border-radius: 8px; }
+        .badge { border-radius: 6px; }
+        .alert { border-radius: 10px; border: none; }
+        .table th { font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; color: #6c757d; }
+        .user-badge {
+            background: rgba(13,110,253,.1); color: var(--primary); border-radius: 20px;
+            padding: .25rem .85rem; font-size: .82rem; font-weight: 600;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    bool isAdmin = User.IsInRole("Admin");
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo"><i class="fas fa-syringe text-white"></i></div>
+            <div>
+                <span>VaccinCenter</span>
+                <small>Gestion vaccination</small>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            @if (isAdmin)
+            {
+                <div class="nav-section">Administration</div>
+                <a href="/Admin/Dashboard" class="@(ViewData["Active"]?.ToString()=="Dashboard"?"active":"")">
+                    <i class="fas fa-chart-pie"></i> Tableau de bord
+                </a>
+                <a href="/Admin/Vaccins" class="@(ViewData["Active"]?.ToString()=="Vaccins"?"active":"")">
+                    <i class="fas fa-vial"></i> Vaccins
+                </a>
+                <a href="/Admin/Citoyens" class="@(ViewData["Active"]?.ToString()=="Citoyens"?"active":"")">
+                    <i class="fas fa-users"></i> Citoyens
+                </a>
+                <a href="/Admin/Centres" class="@(ViewData["Active"]?.ToString()=="Centres"?"active":"")">
+                    <i class="fas fa-hospital"></i> Centres
+                </a>
+                <a href="/Admin/RendezVous" class="@(ViewData["Active"]?.ToString()=="RDV"?"active":"")">
+                    <i class="fas fa-calendar-check"></i> Rendez-vous
+                </a>
+                <a href="/Admin/Comptes" class="@(ViewData["Active"]?.ToString()=="Comptes"?"active":"")">
+                    <i class="fas fa-user-shield"></i> Comptes
+                </a>
+            }
+            else
+            {
+                <div class="nav-section">Espace citoyen</div>
+                <a href="/Home/Index" class="@(ViewData["Active"]?.ToString()=="Home"?"active":"")">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="/Home/Search" class="@(ViewData["Active"]?.ToString()=="Search"?"active":"")">
+                    <i class="fas fa-search"></i> Rechercher vaccins
+                </a>
+            }
+            <div class="nav-section mt-3">Compte</div>
+            <a href="/Account/Logout">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="top-nav">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><i class="fas fa-home me-1"></i>Accueil</li>
+                    <li class="breadcrumb-item active">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-user-circle text-primary"></i>
+                <span class="user-badge">@User.Identity.Name</span>
+                @if (isAdmin)
+                {
+                    <span class="badge bg-danger">Admin</span>
+                }
+            </div>
+        </div>
+        <div class="page-content">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

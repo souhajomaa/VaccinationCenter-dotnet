@@ -1,0 +1,73 @@
+@model VaccinationCenter.Models.Citoyen
+@{
+    ViewData["Title"] = Model.CiToyenId == 0 ? "Ajouter un citoyen" : "Modifier le citoyen";
+    ViewData["Active"] = "Citoyens";
+    var action = Model.CiToyenId == 0 ? "CreateCitoyen" : "EditCitoyen";
+}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h6 class="mb-0"><i class="fas fa-user-plus me-2"></i>@ViewData["Title"]</h6>
+      </div>
+      <div class="card-body">
+        <form asp-action="@action" method="post">
+          @Html.AntiForgeryToken()
+          <input asp-for="CiToyenId" type="hidden" />
+          <h6 class="text-muted fw-semibold mb-3">Informations personnelles</h6>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label asp-for="CIN" class="form-label fw-semibold">CIN</label>
+              <input asp-for="CIN" class="form-control" />
+              <span asp-validation-for="CIN" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="NumeroEvax" class="form-label fw-semibold">Numéro EVAX</label>
+              <input asp-for="NumeroEvax" type="number" class="form-control" />
+              <span asp-validation-for="NumeroEvax" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Nom" class="form-label fw-semibold">Nom</label>
+              <input asp-for="Nom" class="form-control" />
+              <span asp-validation-for="Nom" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Prenom" class="form-label fw-semibold">Prénom</label>
+              <input asp-for="Prenom" class="form-control" />
+              <span asp-validation-for="Prenom" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Age" class="form-label fw-semibold">Âge</label>
+              <input asp-for="Age" type="number" class="form-control" />
+              <span asp-validation-for="Age" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="Telephone" class="form-label fw-semibold">Téléphone</label>
+              <input asp-for="Telephone" type="number" class="form-control" />
+              <span asp-validation-for="Telephone" class="text-danger small"></span>
+            </div>
+          </div>
+          <h6 class="text-muted fw-semibold mb-3">Adresse</h6>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Numéro de rue</label>
+              <input name="addresse.Rue" type="number" class="form-control" value="@Model.Addresse?.Rue" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Code postal</label>
+              <input name="addresse.CodePostal" type="number" class="form-control" value="@Model.Addresse?.CodePostal" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Ville</label>
+              <input name="addresse.Ville" class="form-control" value="@Model.Addresse?.Ville" />
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Enregistrer</button>
+            <a href="/Admin/Citoyens" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

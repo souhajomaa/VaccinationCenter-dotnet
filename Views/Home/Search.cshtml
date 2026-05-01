@@ -1,0 +1,76 @@
+@model VaccinationCenter.ViewModels.VaccinSearchViewModel
+@{
+    ViewData["Title"] = "Rechercher un vaccin";
+    ViewData["Active"] = "Search";
+    var hasQuery = Context.Request.QueryString.HasValue;
+}
+<h5 class="fw-bold mb-4"><i class="fas fa-search me-2 text-primary"></i>Recherche avancée</h5>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form asp-action="Search" method="get" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Date (à partir de)</label>
+        <input type="date" name="Date" class="form-control" value="@Model.Date?.ToString("yyyy-MM-dd")" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Type de vaccin</label>
+        <select name="Type" class="form-select"
+                asp-items="Html.GetEnumSelectList<VaccinationCenter.Models.TypeVaccin>()">
+          <option value="">-- Tous les types --</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Fournisseur</label>
+        <input type="text" name="Fournisseur" class="form-control" placeholder="Nom du fournisseur" value="@Model.Fournisseur" />
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary me-2">
+          <i class="fas fa-search me-1"></i>Rechercher
+        </button>
+        <a href="/Home/Search" class="btn btn-outline-secondary">Réinitialiser</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+@if (Model.Results.Any())
+{
+    <p class="text-muted small mb-3">@Model.Results.Count() résultat(s) trouvé(s)</p>
+    <div class="row g-3">
+    @foreach (var v in Model.Results)
+    {
+        var color = v.TypeVaccin.ToString() == "PFizer" ? "#0d6efd" :
+                    v.TypeVaccin.ToString() == "Moderna" ? "#198754" : "#fd7e14";
+        <div class="col-md-4">
+            <div class="card h-100" style="border-left: 4px solid @color">
+                <div class="card-body">
+                    <span class="badge mb-2" style="background:@color">@v.TypeVaccin</span>
+                    <h6 class="fw-bold">@v.Fournisseur</h6>
+                    <div class="small text-muted mb-2">
+                        <div><i class="fas fa-calendar me-1"></i>Valide : @v.DateValidite.ToString("dd/MM/yyyy")</div>
+                        <div><i class="fas fa-box me-1"></i>Stock : @v.Quantite unités</div>
+                    </div>
+                    @if (v.Quantite > 0 && v.DateValidite >= DateTime.Now)
+                    {
+                        <a href="/Home/Reserver/@v.VaccinId" class="btn btn-sm btn-primary w-100">
+                            <i class="fas fa-calendar-plus me-1"></i>Réserver
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger w-100 p-2">Indisponible</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+}
+else if (hasQuery)
+{
+    <div class="text-center py-4 text-muted">
+        <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+        <p>Aucun résultat pour cette recherche</p>
+    </div>
+}

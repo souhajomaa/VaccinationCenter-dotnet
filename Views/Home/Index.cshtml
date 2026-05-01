@@ -1,0 +1,60 @@
+@model IEnumerable<VaccinationCenter.Models.Vaccin>
+@{
+    ViewData["Title"] = "Vaccins disponibles";
+    ViewData["Active"] = "Home";
+}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-syringe me-2 text-primary"></i>Vaccins disponibles</h4>
+        <p class="text-muted small mb-0">Consultez et réservez un vaccin</p>
+    </div>
+    <a href="/Home/Search" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-search me-1"></i>Recherche avancée
+    </a>
+</div>
+
+<div class="row g-3">
+@foreach (var v in Model)
+{
+    var color = v.TypeVaccin.ToString() == "PFizer" ? "#0d6efd" :
+                v.TypeVaccin.ToString() == "Moderna" ? "#198754" : "#fd7e14";
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm" style="border-top: 4px solid @color !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge" style="background:@color">@v.TypeVaccin</span>
+                    <span class="small text-muted">Valide jusqu'au @v.DateValidite.ToString("dd/MM/yyyy")</span>
+                </div>
+                <h6 class="fw-bold">@v.Fournisseur</h6>
+                <p class="small text-muted mb-2">
+                    <i class="fas fa-hospital me-1"></i>@(v.CentreVaccination?.ResponsableCentre ?? "N/A")
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold @(v.Quantite > 50 ? "text-success" : v.Quantite > 0 ? "text-warning" : "text-danger")">
+                        <i class="fas fa-box me-1"></i>@v.Quantite unités
+                    </span>
+                    @if (v.Quantite > 0 && v.DateValidite >= DateTime.Now)
+                    {
+                        <a href="/Home/Reserver/@v.VaccinId" class="btn btn-sm btn-primary">
+                            <i class="fas fa-calendar-plus me-1"></i>Réserver
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Indisponible</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>
+@if (!Model.Any())
+{
+    <div class="card">
+        <div class="card-body text-center py-5 text-muted">
+            <i class="fas fa-vial fa-3x mb-3 opacity-25"></i>
+            <p>Aucun vaccin disponible pour le moment</p>
+        </div>
+    </div>
+}

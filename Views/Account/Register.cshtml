@@ -1,0 +1,65 @@
+@model VaccinationCenter.ViewModels.RegisterViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Inscription";
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>VaccinCenter – Inscription</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { margin:0; min-height:100vh; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); display:flex; align-items:center; justify-content:center; font-family:'Segoe UI',sans-serif; }
+        .card { width:460px; border-radius:20px; border:none; box-shadow:0 25px 60px rgba(0,0,0,.45); overflow:hidden; }
+        .card-header { background:linear-gradient(135deg,#0d6efd,#0a4ab5); padding:2rem; border:none; }
+        .card-header h4 { color:#fff; margin:0; font-weight:700; }
+        .card-header p { color:rgba(255,255,255,.75); margin:0; font-size:.9rem; }
+        .card-body { padding:2rem; }
+        .form-label { font-size:.83rem; font-weight:600; color:#374151; }
+        .form-control { border:1.5px solid #e5e7eb; border-radius:10px; padding:.65rem 1rem; }
+        .form-control:focus { border-color:#0d6efd; box-shadow:0 0 0 3px rgba(13,110,253,.12); }
+        .btn-register { background:linear-gradient(135deg,#0d6efd,#0a4ab5); border:none; color:#fff; border-radius:10px; padding:.75rem; font-weight:600; width:100%; }
+        .text-danger { font-size:.78rem; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="fas fa-user-plus fa-2x text-white opacity-75"></i>
+            <h4>Créer un compte</h4>
+        </div>
+        <p>Rejoignez la plateforme VaccinCenter</p>
+    </div>
+    <div class="card-body">
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label asp-for="Login" class="form-label">Login</label>
+                <input asp-for="Login" class="form-control" placeholder="Choisissez un login" />
+                <span asp-validation-for="Login" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Mot de passe</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 caractères" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label">Confirmer le mot de passe</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Répétez le mot de passe" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-register">
+                <i class="fas fa-check me-2"></i>S'inscrire
+            </button>
+            <div class="text-center mt-3">
+                <small class="text-muted">Déjà un compte ? <a href="/Account/Login">Se connecter</a></small>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+@model VaccinationCenter.ViewModels.ReservationViewModel
+@{
+    ViewData["Title"] = "Réserver un vaccin";
+    ViewData["Active"] = "Home";
+}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    @if (Model.Vaccin != null)
+    {
+        var color = Model.Vaccin.TypeVaccin.ToString() == "PFizer" ? "#0d6efd" :
+                    Model.Vaccin.TypeVaccin.ToString() == "Moderna" ? "#198754" : "#fd7e14";
+        <div class="card mb-3" style="border-left: 5px solid @color">
+            <div class="card-body d-flex gap-3 align-items-center">
+                <i class="fas fa-vial fa-2x" style="color:@color"></i>
+                <div>
+                    <div class="fw-bold">@Model.Vaccin.TypeVaccin — @Model.Vaccin.Fournisseur</div>
+                    <div class="small text-muted">
+                        Stock : @Model.Vaccin.Quantite unités &nbsp;|&nbsp;
+                        Valide jusqu'au @Model.Vaccin.DateValidite.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h6 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Formulaire de réservation</h6>
+      </div>
+      <div class="card-body">
+        <form asp-action="Reserver" method="post">
+          @Html.AntiForgeryToken()
+          <input asp-for="VaccinId" type="hidden" />
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label asp-for="CIN" class="form-label fw-semibold">CIN du citoyen</label>
+              <input asp-for="CIN" class="form-control" placeholder="Ex: 12345678" />
+              <span asp-validation-for="CIN" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="CodeInfirmiere" class="form-label fw-semibold">Code infirmière</label>
+              <input asp-for="CodeInfirmiere" class="form-control" placeholder="Ex: INF001" />
+              <span asp-validation-for="CodeInfirmiere" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="DateVaccination" class="form-label fw-semibold">Date de vaccination</label>
+              <input asp-for="DateVaccination" type="datetime-local" class="form-control" />
+              <span asp-validation-for="DateVaccination" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+              <label asp-for="NbrDoses" class="form-label fw-semibold">Nombre de doses</label>
+              <input asp-for="NbrDoses" type="number" min="1" max="10" class="form-control" />
+              <span asp-validation-for="NbrDoses" class="text-danger small"></span>
+            </div>
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-check me-1"></i>Confirmer la réservation
+            </button>
+            <a href="/Home/Index" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
