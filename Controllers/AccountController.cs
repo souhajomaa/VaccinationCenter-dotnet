@@ -75,7 +75,6 @@ namespace VaccinationCenter.Controllers
         }
 
         public IActionResult AccessDenied() => View();
-        // Route spéciale pour Postman
         [HttpPost("/api/login")]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> ApiLogin([FromBody] LoginApiModel model)
@@ -84,7 +83,7 @@ namespace VaccinationCenter.Controllers
             if (compte == null)
                 return Unauthorized(new { message = "Login ou mot de passe incorrect" });
 
-            var claims = new List<Claim>
+            var claims = new List<Claim> 
     {
         new(ClaimTypes.Name, compte.Login),
         new(ClaimTypes.Role, compte.Role.ToString()),

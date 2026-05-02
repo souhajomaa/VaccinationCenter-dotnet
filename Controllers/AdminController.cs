@@ -40,10 +40,11 @@ namespace VaccinationCenter.Controllers
         // ========== VACCINS CRUD ==========
         public async Task<IActionResult> Vaccins() => View(await _vaccinService.GetWithCentreAsync());
 
-        [HttpGet] public async Task<IActionResult> CreateVaccin()
+        [HttpGet]
+        public async Task<IActionResult> CreateVaccin()
         {
             ViewBag.Centres = await _centreService.GetAllAsync();
-            return View();
+            return View(new Vaccin());
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -55,7 +56,8 @@ namespace VaccinationCenter.Controllers
             return RedirectToAction("Vaccins");
         }
 
-        [HttpGet] public async Task<IActionResult> EditVaccin(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditVaccin(int id)
         {
             var vaccin = await _vaccinService.GetByIdAsync(id);
             if (vaccin == null) return NotFound();
@@ -83,7 +85,7 @@ namespace VaccinationCenter.Controllers
         // ========== CITOYENS CRUD ==========
         public async Task<IActionResult> Citoyens() => View(await _citoyenService.GetWithAddresseAsync());
 
-        [HttpGet] public IActionResult CreateCitoyen() => View();
+        [HttpGet] public IActionResult CreateCitoyen() => View(new Citoyen());
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCitoyen(Citoyen citoyen, Addresse addresse)
@@ -95,7 +97,8 @@ namespace VaccinationCenter.Controllers
             return RedirectToAction("Citoyens");
         }
 
-        [HttpGet] public async Task<IActionResult> EditCitoyen(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditCitoyen(int id)
         {
             var citoyen = await _citoyenService.GetByIdAsync(id);
             if (citoyen == null) return NotFound();
@@ -122,7 +125,7 @@ namespace VaccinationCenter.Controllers
         // ========== CENTRES CRUD ==========
         public async Task<IActionResult> Centres() => View(await _centreService.GetAllAsync());
 
-        [HttpGet] public IActionResult CreateCentre() => View();
+        [HttpGet] public IActionResult CreateCentre() => View(new CentreVaccination());
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCentre(CentreVaccination centre)
@@ -133,7 +136,8 @@ namespace VaccinationCenter.Controllers
             return RedirectToAction("Centres");
         }
 
-        [HttpGet] public async Task<IActionResult> EditCentre(int id)
+        [HttpGet]
+        public async Task<IActionResult> EditCentre(int id)
         {
             var centre = await _centreService.GetByIdAsync(id);
             if (centre == null) return NotFound();
