@@ -1,0 +1,117 @@
+name: CI - Build, Test, Scan, Push
+
+# ----------------------------------------------------------------
+# QUAND ce workflow se déclenche-t-il ?
+# - À chaque push sur main/master (ex: après un merge)
+# - À chaque pull request vers main/master (pour valider AVANT de merger)
+# ----------------------------------------------------------------
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Variables réutilisables dans tout le fichier (évite de répéter les valeurs)
+env:
+  DOTNET_VERSION: '8.0.x'
+  IMAGE_NAME: vaccinationcenter   # toujours en minuscules : obligatoire pour un registre de conteneurs
+  REGISTRY: ghcr.io               # GitHub Container Registry - gratuit
+
+# Permissions données au token automatique GITHUB_TOKEN pour CE workflow.
+# Par défaut GITHUB_TOKEN ne peut que LIRE. On lui donne le droit d'écrire
+# des paquets (packages: write) pour pouvoir publier notre image Docker.
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ================================================================
+  # JOB 1 : Build & Test du code .NET
+  # Tourne sur une VM Ubuntu fraîche fournie gratuitement par GitHub
+  # ================================================================
+  build-and-test:
+    name: Build & Test (.NET)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+        # "uses" = on réutilise une action déjà écrite par quelqu'un d'autre
+        # (ici l'action officielle GitHub qui clone ton repo sur la VM)
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+        # Installe le SDK .NET 8 sur la VM (elle est vide au départ)
+
+      - name: Restore des dépendances
+        run: dotnet restore VaccinationCenter-dotnet-master/VaccinationCenter.csproj
+        # "run" = on exécute une commande shell classique, comme dans ton terminal
+
+      - name: Build (Release)
+        run: dotnet build VaccinationCenter-dotnet-master/VaccinationCenter.csproj --configuration Release --no-restore
+
+      - name: Run tests (si un projet de tests existe)
+        run: |
+          if find . -name "*.Tests.csproj" | grep -q .; then
+            dotnet test --no-build --configuration Release --logger "console;verbosity=normal"
+          else
+            echo "Aucun projet de tests trouvé pour le moment - étape ignorée."
+            echo "À ajouter plus tard : un projet xUnit pour tester tes Services."
+          fi
+
+  # ================================================================
+  # JOB 2 : Build de l'image Docker + scan sécurité + publication
+  # "needs: build-and-test" = ce job attend que le Job 1 réussisse
+  # avant de démarrer. Si le build/test échoue, l'image n'est jamais publiée.
+  # ================================================================
+  docker-build-scan-push:
+    name: Build, Scan & Push Docker Image
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # On ne publie l'image QUE sur un vrai push (pas sur une pull request),
+    # par sécurité : une PR peut venir d'un fork externe non fiable.
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Build de l'image Docker
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} VaccinationCenter-dotnet-master
+        # github.sha = l'identifiant unique du commit. On tague l'image avec
+        # ça pour pouvoir toujours savoir EXACTEMENT quel code tourne dans
+        # quelle image (traçabilité - un principe central du DevOps).
+
+      - name: Scan de vulnérabilités avec Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+        # Trivy inspecte l'image et liste les failles connues dans les
+        # dépendances. exit-code '0' = le pipeline continue même si des
+        # failles sont trouvées (mode "alerte"). Plus tard, en DevSecOps
+        # plus strict, tu mettras '1' pour BLOQUER le déploiement.
+
+      - name: Connexion à GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        # Avantage de GHCR : pas besoin de créer un secret manuellement !
+        # GITHUB_TOKEN est généré automatiquement par GitHub à chaque run,
+        # avec une durée de vie limitée au workflow. Zéro mot de passe à gérer.
+
+      - name: Tag et push de l'image
+        run: |
+          IMAGE_FULL=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          IMAGE_FULL=$(echo "$IMAGE_FULL" | tr '[:upper:]' '[:lower:]')
+          docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} $IMAGE_FULL:${{ github.sha }}
+          docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} $IMAGE_FULL:latest
+          docker push $IMAGE_FULL:${{ github.sha }}
+          docker push $IMAGE_FULL:latest
+        # On publie DEUX tags :
+        # - :<sha>   → une version immuable, figée, pour la traçabilité
+        # - :latest  → un alias pratique qui pointe toujours vers la dernière version
